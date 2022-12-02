@@ -9,10 +9,11 @@ import java.util.Random;
 
 public class FlappyBird implements ActionListener  {
     public static FlappyBird flappyBird;
-    public final int WIDTH = 600, HEIGHT = 600;
+    public final int WIDTH = 800, HEIGHT = 800;
     public Renderer renderer;
     public int ticks, yMotion;
     public Rectangle bird;
+    public boolean gameOver, started = true;
     public Random random;
     public ArrayList<Rectangle> columns;
 
@@ -49,17 +50,29 @@ public class FlappyBird implements ActionListener  {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ticks++;
         int speed = 10;
+        ticks++;
 
-        for (int i = 0 ; i < columns.size(); i++){
-            Rectangle column = columns.get(i);
-            column.x -= speed;
+        if (started) {
+            for (int i = 0; i < columns.size(); i++) {
+                Rectangle column = columns.get(i);
+                column.x -= speed;
+            }
+            if (ticks % 2 == 0 && yMotion < 15) {
+                yMotion = +2;
+            }
+            bird.y += yMotion;
+            //detects if the bird collides with the column
+            for (Rectangle column : columns) {
+                if (column.intersects(bird)) {
+                    gameOver = true;
+                }
+            }
+            //detects if the bird collides with the ground
+            if (bird.y > HEIGHT - 120 || bird.y < 0) {
+                gameOver = true;
+            }
         }
-        if (ticks % 2 == 0 && yMotion < 15){
-            yMotion =+ 2;
-        }
-        bird.y += yMotion;
         renderer.repaint();
 
         for (int i = 0 ; i < columns.size(); i++){
@@ -112,5 +125,13 @@ public class FlappyBird implements ActionListener  {
         for (Rectangle column : columns){
             paintColumn(g,column);
         }
+
+        g.setColor(Color.white);
+        g.setFont(new Font("Arial",1,100));
+
+        if(gameOver){
+            g.drawString("Game Over!",75,HEIGHT/2 - 50);
+        }
+
     }
 }
